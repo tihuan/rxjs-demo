@@ -34,6 +34,12 @@ function output($timeout, rx) {
   }
 
   function link(scope, ele, attrs) {
+    // cold, hot - quick graphs
+    // streamA, streamB, combinedStream
+    // collections for output - safeApply
+    // $timeout to delay subscribe streamB
+    // streams can be proxies/interfaces for actual outputs
+
     var subA, subB, subC
     var source = rx.Observable.interval(1000);
     var hot = source.publish();
