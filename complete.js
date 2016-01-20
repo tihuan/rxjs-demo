@@ -25,21 +25,28 @@ function output($timeout, rx) {
   function template(ele, attrs) {
     return [
       '<h1>RxJS ROCKS!</h1>',
-      '{{collectionA}}',
+      'A: {{collectionA}}',
       '<br>',
-      '{{collectionB}}',
+      'B: {{collectionB}}',
       '<br>',
-      '{{collectionC}}',
+      'C: {{collectionC}}',
     ].join('\n');
   }
 
   function link(scope, ele, attrs) {
-    // cold, hot - quick graphs
+    // cold subscribe, hot connect - quick graphs
     // streamA, streamB, combinedStream
+    // unsubscribe by dispose() subs
     // collections for output - safeApply
     // $timeout to delay subscribe streamB
     // streams can be proxies/interfaces for actual outputs
     // zip streams to create combinedStream
+    //
+    // OBJECTIVES:
+    // COLD observables look like
+    // HOT oservables look like
+    // How to create substreams from a source
+    // How to combine substreams and create a new stream out of it
 
     var subA, subB, subC
     var source = rx.Observable.interval(1000);

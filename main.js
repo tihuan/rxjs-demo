@@ -25,17 +25,25 @@ function output($timeout, rx) {
   function template(ele, attrs) {
     return [
       '<h1>RxJS ROCKS!</h1>',
-      '{{collectionA}}',
+      'A: {{collectionA}}',
       '<br>',
-      '{{collectionB}}',
+      'B: {{collectionB}}',
       '<br>',
-      '{{collectionC}}',
+      'C: {{collectionC}}',
     ].join('\n');
   }
 
   function link(scope, ele, attrs) {
-    // cold, hot - quick graphs
+    // OBJECTIVES:
+    // COLD observables look like
+    // HOT oservables look like
+    // How to create substreams from a source
+    // How to combine substreams and create a new stream out of it
+    //
+    // NOTES:
+    // cold subscribe, hot connect - quick graphs
     // streamA, streamB, combinedStream
+    // unsubscribe by dispose() subs
     // collections for output - safeApply
     // $timeout to delay subscribe streamB
     // streams can be proxies/interfaces for actual outputs
@@ -51,53 +59,42 @@ function output($timeout, rx) {
     scope.collectionB = [];
     scope.collectionC = [];
 
-    hot
-      .subscribe(function(value) {
-        streamA.onNext(value + 1);
-      });
+    // source.subscribe(function(value) {
+    //   // console.log(value);
+    // })
+
+    hot.subscribe(function(value) {
+      streamA.onNext(value);
+    })
 
     $timeout(function() {
-      hot
-        .subscribe(function(value) {
-          streamB.onNext(value + 101);
-        });
-    }, 5 * 1000)
-
-    combinedStream = rx.Observable
-      .zip(
-        streamA,
-        streamB,
-        function(itemA, itemB) {
-          return 'A: ' + itemA + ' ' + 'B: ' + itemB;
-        }
-      );
-
-    subA = streamA
-      .safeApply(scope, function(itemA) {
-        scope.collectionA.push(itemA);
+      subB = hot.subscribe(function(value) {
+        streamB.onNext(value + 100);
       })
-      .subscribe()
+    }, 5 * 1000);
 
-    subB = streamB
-      .safeApply(scope, function(itemB) {
-        scope.collectionB.push(itemB);
-      })
-      .subscribe()
+    combinedStream = rx.Observable.zip(streamA, streamB, function(itemA, itemB) {
+      return 'A: ' + itemA + ' ' + 'B: ' + itemB;
+    })
 
-    subC = combinedStream
-      .safeApply(
-        scope,
-        function(result) {
-          scope.collectionC.push(result);
-        }
-      )
-      .subscribe()
+    streamA.safeApply(scope, function(value) {
+      scope.collectionA.push(value);
+    })
+      .subscribe();
+
+    streamB.safeApply(scope, function(value) {
+      scope.collectionB.push(value);
+    })
+      .subscribe();
+
+    combinedStream.safeApply(scope, function(value) {
+      scope.collectionC.push(value);
+    })
+      .subscribe();
 
     $timeout(function() {
-      subA.dispose();
       subB.dispose();
-      subC.dispose();
-    }, 16 * 1000)
+    }, 10 * 1000)
 
     hot.connect();
   }
