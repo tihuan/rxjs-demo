@@ -59,43 +59,52 @@ function output($timeout, rx) {
     scope.collectionB = [];
     scope.collectionC = [];
 
-    // source.subscribe(function(value) {
-    //   // console.log(value);
-    // })
+    // Create a promise which resolves 42
+    var promise1 = new RSVP.Promise(function (resolve, reject) {
+        resolve(42);
+    });
 
-    hot.subscribe(function(value) {
-      streamA.onNext(value);
-    })
+    var source1 = Rx.Observable.fromPromise(promise1);
 
-    $timeout(function() {
-      subB = hot.subscribe(function(value) {
-        streamB.onNext(value + 100);
+    var subscription1 = source1
+      .map(function(result) {
+        console.log('I got it!');
+        console.log(result);
+        return result
       })
-    }, 5 * 1000);
+      .subscribe(
+        function (x) {
+          console.log('Next: %s', x);
+        },
+        function (err) {
+          console.log('Error: %s', err);
+        },
+        function () {
+          console.log('Completed');
+        })
 
-    combinedStream = rx.Observable.zip(streamA, streamB, function(itemA, itemB) {
-      return 'A: ' + itemA + ' ' + 'B: ' + itemB;
-    })
+    // Create a promise which rejects with an error
+    var promise2 = new RSVP.Promise(function (resolve, reject) {
+        reject(new Error('reason'));
+    });
 
-    streamA.safeApply(scope, function(value) {
-      scope.collectionA.push(value);
-    })
-      .subscribe();
+    var source2 = Rx.Observable.fromPromise(promise2);
 
-    streamB.safeApply(scope, function(value) {
-      scope.collectionB.push(value);
-    })
-      .subscribe();
-
-    combinedStream.safeApply(scope, function(value) {
-      scope.collectionC.push(value);
-    })
-      .subscribe();
-
-    $timeout(function() {
-      subB.dispose();
-    }, 10 * 1000)
-
-    hot.connect();
+    var subscription2 = source2
+      .map(function(result) {
+        console.log('I got it 2!');
+        console.log(result);
+        return result
+      })
+      .subscribe(
+        function (x) {
+          console.log('Next: %s', x);
+        },
+        function (err) {
+          console.log('Error: %s', err);
+        },
+        function () {
+          console.log('Completed');
+        });
   }
 }
